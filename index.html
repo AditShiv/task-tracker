@@ -79,9 +79,11 @@
       transition: background-color 0.4s ease, transform 0.4s ease;
     }
     .step:last-child .circle {
-      left: 100%;
-      transform: translateX(-50%);
-    }
+  right: 0;
+  left: auto;
+  transform: translateX(50%);
+}
+
     .step.active .circle {
       background-color: #4CAF50;
       transform: scale(1.2);
