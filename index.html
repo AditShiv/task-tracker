@@ -52,8 +52,15 @@
       border-radius: 50%;
       background-color: #ccc;
       margin: 0 auto;
-      position: relative;
+      position: absolute;
+      top: 20px;
+      left: 0;
+      transform: translateX(-50%);
       z-index: 2;
+    }
+    .step:last-child .circle {
+      left: 100%;
+      transform: translateX(-50%);
     }
     .step.active .circle {
       background-color: #4CAF50;
@@ -61,10 +68,9 @@
     .step .bar {
       position: absolute;
       top: 29px;
-      left: 50%;
-      transform: translateX(-50%);
-      height: 4px;
+      left: 0;
       width: 100%;
+      height: 4px;
       background-color: #ccc;
       z-index: 1;
     }
@@ -75,7 +81,7 @@
       display: none;
     }
     .label {
-      margin-top: 40px;
+      margin-top: 60px;
       font-weight: bold;
     }
     .buttons {
@@ -98,7 +104,7 @@
     }
     .history {
       margin-top: 50px;
-      max-width: 600px;
+      max-width: 700px;
       margin-left: auto;
       margin-right: auto;
     }
@@ -115,6 +121,24 @@
       padding: 10px;
       border-left: 5px solid #4CAF50;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .history input {
+      font-size: 14px;
+      padding: 5px;
+      margin-right: 10px;
+    }
+    .history select {
+      padding: 5px;
+      margin-right: 10px;
+    }
+    .history button {
+      padding: 5px 10px;
+      font-size: 14px;
+      margin-left: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -127,11 +151,11 @@
   </div>
 
   <div class="tracker" id="tracker">
-    <div class="step"><div class="circle"></div><div class="bar"></div><div class="label">Starting</div></div>
-    <div class="step"><div class="circle"></div><div class="bar"></div><div class="label">Researching</div></div>
-    <div class="step"><div class="circle"></div><div class="bar"></div><div class="label">Sending</div></div>
-    <div class="step"><div class="circle"></div><div class="bar"></div><div class="label">Getting</div></div>
-    <div class="step"><div class="circle"></div><div class="bar"></div><div class="label">Doing</div></div>
+    <div class="step"><div class="bar"></div><div class="circle"></div><div class="label">Starting</div></div>
+    <div class="step"><div class="bar"></div><div class="circle"></div><div class="label">Researching</div></div>
+    <div class="step"><div class="bar"></div><div class="circle"></div><div class="label">Sending</div></div>
+    <div class="step"><div class="bar"></div><div class="circle"></div><div class="label">Getting</div></div>
+    <div class="step"><div class="bar"></div><div class="circle"></div><div class="label">Doing</div></div>
     <div class="step"><div class="circle"></div><div class="label">Completed</div></div>
   </div>
 
@@ -188,7 +212,7 @@
         return;
       }
       const stage = steps[currentStep]?.querySelector('.label')?.textContent || "Not Started";
-      const entry = { heading, stage, timestamp: new Date().toLocaleString() };
+      const entry = { id: Date.now(), heading, stage, timestamp: new Date().toLocaleString() };
 
       let history = JSON.parse(localStorage.getItem("taskHistory")) || [];
       history.push(entry);
@@ -202,11 +226,57 @@
       const history = JSON.parse(localStorage.getItem("taskHistory")) || [];
       history.forEach(item => {
         const li = document.createElement("li");
-        li.textContent = `${item.heading} — ${item.stage} (${item.timestamp})`;
+
+        const headingInput = document.createElement("input");
+        headingInput.value = item.heading;
+        headingInput.onchange = () => updateItem(item.id, headingInput.value, null);
+
+        const stageSelect = document.createElement("select");
+        ["Starting", "Researching", "Sending", "Getting", "Doing", "Completed"].forEach(stage => {
+          const option = document.createElement("option");
+          option.value = stage;
+          option.textContent = stage;
+          if (stage === item.stage) option.selected = true;
+          stageSelect.appendChild(option);
+        });
+        stageSelect.onchange = () => updateItem(item.id, null, stageSelect.value);
+
+        const timestamp = document.createElement("span");
+        timestamp.textContent = ` (${item.timestamp})`;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.onclick = () => deleteItem(item.id);
+
+        li.appendChild(headingInput);
+        li.appendChild(stageSelect);
+        li.appendChild(timestamp);
+        li.appendChild(deleteBtn);
         historyList.appendChild(li);
       });
     }
 
+    function updateItem(id, newHeading, newStage) {
+      let history = JSON.parse(localStorage.getItem("taskHistory")) || [];
+      history = history.map(item => {
+        if (item.id === id) {
+          if (newHeading !== null) item.heading = newHeading;
+          if (newStage !== null) item.stage = newStage;
+        }
+        return item;
+      });
+            localStorage.setItem("taskHistory", JSON.stringify(history));
+      renderHistory();
+    }
+
+    function deleteItem(id) {
+      let history = JSON.parse(localStorage.getItem("taskHistory")) || [];
+      history = history.filter(item => item.id !== id);
+      localStorage.setItem("taskHistory", JSON.stringify(history));
+      renderHistory();
+    }
+
+    // Initial render on page load
     renderHistory();
     updateButtons();
   </script>
