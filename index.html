@@ -17,7 +17,7 @@
       display: flex;
       justify-content: space-between;
       margin: 40px auto;
-      max-width: 600px;
+      max-width: 700px;
       position: relative;
     }
     .step {
@@ -61,9 +61,12 @@
       margin-top: 40px;
       font-weight: bold;
     }
+    .buttons {
+      text-align: center;
+      margin-top: 40px;
+    }
     button {
-      display: block;
-      margin: 40px auto;
+      margin: 0 10px;
       padding: 10px 20px;
       font-size: 16px;
       background-color: #4CAF50;
@@ -81,27 +84,45 @@
 <body>
   <h1>Task Progress Tracker</h1>
   <div class="tracker" id="tracker">
-    <div class="step active"><div class="label">Researching</div></div>
+    <div class="step"><div class="label">Starting</div></div>
+    <div class="step"><div class="label">Researching</div></div>
     <div class="step"><div class="label">Sending</div></div>
     <div class="step"><div class="label">Getting</div></div>
     <div class="step"><div class="label">Doing</div></div>
   </div>
-  <button id="nextBtn">Next Task</button>
+  <div class="buttons">
+    <button id="undoBtn">Undo</button>
+    <button id="nextBtn">Next Task</button>
+  </div>
 
   <script>
     const steps = document.querySelectorAll('.step');
     const nextBtn = document.getElementById('nextBtn');
-    let currentStep = 0;
+    const undoBtn = document.getElementById('undoBtn');
+    let currentStep = -1; // Start with no active steps
+
+    function updateButtons() {
+      nextBtn.disabled = currentStep >= steps.length - 1;
+      undoBtn.disabled = currentStep < 0;
+    }
 
     nextBtn.addEventListener('click', () => {
       if (currentStep < steps.length - 1) {
         currentStep++;
         steps[currentStep].classList.add('active');
-        if (currentStep === steps.length - 1) {
-          nextBtn.disabled = true;
-        }
+        updateButtons();
       }
     });
+
+    undoBtn.addEventListener('click', () => {
+      if (currentStep >= 0) {
+        steps[currentStep].classList.remove('active');
+        currentStep--;
+        updateButtons();
+      }
+    });
+
+    updateButtons();
   </script>
 </body>
 </html>
