@@ -320,66 +320,71 @@ function readOnly() {
     }
 
     function renderHistory() {
-      historyList.innerHTML = "";
-      const history = JSON.parse(localStorage.getItem("taskHistory")) || [];
-      history.forEach(item => {
-        const li = document.createElement("li");
+  historyList.innerHTML = "";
+  const history = JSON.parse(localStorage.getItem("taskHistory")) || [];
+  history.forEach(item => {
+    const li = document.createElement("li");
 
-        const headingInput = document.createElement("input");
-        headingInput.value = item.heading;
-        headingInput.disabled = true;
+    const headingInput = document.createElement("input");
+    headingInput.value = item.heading;
+    headingInput.disabled = true;
 
-        const stageSelect = document.createElement("select");
-        ["Starting", "Researching", "Sending", "Getting", "Doing", "Completed"].forEach(stage => {
-          const option = document.createElement("option");
-          option.value = stage;
-          option.textContent = stage;
-          if (stage === item.stage) option.selected = true;
-          stageSelect.appendChild(option);
-        });
-        stageSelect.disabled = true;
+    const stageSelect = document.createElement("select");
+    ["Starting", "Researching", "Sending", "Getting", "Doing", "Completed"].forEach(stage => {
+      const option = document.createElement("option");
+      option.value = stage;
+      option.textContent = stage;
+      if (stage === item.stage) option.selected = true;
+      stageSelect.appendChild(option);
+    });
+    stageSelect.disabled = true;
 
-        const timestamp = document.createElement("span");
-        timestamp.textContent = ` (${item.timestamp})`;
+    const timestamp = document.createElement("span");
+    timestamp.textContent = ` (${item.timestamp})`;
 
-        const editBtn = document.createElement("button");
-editBtn.textContent = "✏️ Edit";
-editBtn.disabled = isReadOnly;
-editBtn.style.opacity = isReadOnly ? "0.5" : "1";
-editBtn.onclick = () => {
-  if (isReadOnly) {
-    alert("Read-Only mode: Editing is disabled.");
-    return;
-  }
-  headingInput.value = item.heading;
-  setProgressToStage(item.stage);
-  editingId = item.id;
-};
+    const viewBtn = document.createElement("button");
+    viewBtn.textContent = "👁️ View";
+    viewBtn.onclick = () => {
+      headingInput.value = item.heading;
+      setProgressToStage(item.stage);
+      editingId = null;
+    };
 
-        const viewBtn = document.createElement("button");
-        viewBtn.textContent = "👁️ View";
-        viewBtn.onclick = () => {
-          headingInput.value = item.heading;
-          setProgressToStage(item.stage);
-          editingId = null;
-        };
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "✏️ Edit";
+    editBtn.disabled = isReadOnly;
+    editBtn.style.opacity = isReadOnly ? "0.5" : "1";
+    editBtn.onclick = () => {
+      if (isReadOnly) {
+        alert("Read-Only mode: Editing is disabled.");
+        return;
+      }
+      headingInput.value = item.heading;
+      setProgressToStage(item.stage);
+      editingId = item.id;
+    };
 
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "🗑️ Delete";
+    deleteBtn.disabled = isReadOnly;
+    deleteBtn.style.opacity = isReadOnly ? "0.5" : "1";
+    deleteBtn.onclick = () => {
+      if (isReadOnly) {
+        alert("Read-Only mode: Editing is disabled.");
+        return;
+      }
+      deleteItem(item.id);
+    };
 
-        const deleteBtn = document.createElement("button");
-deleteBtn.textContent = "🗑️ Delete";
-          }
-          deleteItem(item.id);
-        };
-
-        li.appendChild(headingInput);
-        li.appendChild(stageSelect);
-        li.appendChild(timestamp);
-        li.appendChild(viewBtn);   // 👁️ View button
-        li.appendChild(editBtn);   // ✏️ Edit button
-        li.appendChild(deleteBtn); // 🗑️ Delete button
-        historyList.appendChild(li);
-      });
-    }
+    li.appendChild(headingInput);
+    li.appendChild(stageSelect);
+    li.appendChild(timestamp);
+    li.appendChild(viewBtn);
+    li.appendChild(editBtn);
+    li.appendChild(deleteBtn);
+    historyList.appendChild(li);
+  });
+}
 
     function deleteItem(id) {
       let history = JSON.parse(localStorage.getItem("taskHistory")) || [];
