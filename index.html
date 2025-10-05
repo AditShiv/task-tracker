@@ -140,6 +140,17 @@
       margin-left: 5px;
       cursor: pointer;
     }
+  .circle-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+.label {
+  margin-top: 8px;
+  font-weight: bold;
+}
+
   </style>
 </head>
 <body>
@@ -151,12 +162,54 @@
   </div>
 
   <div class="tracker" id="tracker">
-    <div class="step"><div class="bar"></div><div class="circle"></div><div class="label">Starting</div></div>
-    <div class="step"><div class="bar"></div><div class="circle"></div><div class="label">Researching</div></div>
-    <div class="step"><div class="bar"></div><div class="circle"></div><div class="label">Sending</div></div>
-    <div class="step"><div class="bar"></div><div class="circle"></div><div class="label">Getting</div></div>
-    <div class="step"><div class="bar"></div><div class="circle"></div><div class="label">Doing</div></div>
-    <div class="step"><div class="circle"></div><div class="label">Completed</div></div>
+    <div class="step">
+  <div class="bar"></div>
+  <div class="circle-label">
+    <div class="circle"></div>
+    <div class="label">Starting</div>
+  </div>
+</div>
+
+    <div class="step">
+  <div class="bar"></div>
+  <div class="circle-label">
+    <div class="circle"></div>
+    <div class="label">Researching </div>
+  </div>
+</div>
+
+    <div class="step">
+  <div class="bar"></div>
+  <div class="circle-label">
+    <div class="circle"></div>
+    <div class="label">Sending</div>
+  </div>
+</div>
+
+    <div class="step">
+  <div class="bar"></div>
+  <div class="circle-label">
+    <div class="circle"></div>
+    <div class="label">Getting</div>
+  </div>
+</div>
+
+    <div class="step">
+  <div class="bar"></div>
+  <div class="circle-label">
+    <div class="circle"></div>
+    <div class="label">Doing</div>
+  </div>
+</div>
+
+    <div class="step">
+  <div class="bar"></div>
+  <div class="circle-label">
+    <div class="circle"></div>
+    <div class="label">Completed</div>
+  </div>
+</div>
+
   </div>
 
   <div class="buttons">
