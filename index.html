@@ -347,6 +347,15 @@
           editingId = item.id;
         };
 
+        const viewBtn = document.createElement("button");
+        viewBtn.textContent = "👁️ View";
+        viewBtn.onclick = () => {
+          headingInput.value = item.heading;
+          setProgressToStage(item.stage);
+          editingId = null;
+        };
+
+
         const deleteBtn = document.createElement("button");
         deleteBtn.textContent = "🗑️ Delete";
         deleteBtn.onclick = () => {
@@ -360,9 +369,10 @@
         li.appendChild(headingInput);
         li.appendChild(stageSelect);
         li.appendChild(timestamp);
-        li.appendChild(editBtn);
-        li.appendChild(deleteBtn);
-        historyList.appendChild(li);
+        li.appendChild(viewBtn);   // 👁️ View button
+        li.appendChild(editBtn);   // ✏️ Edit button
+        li.appendChild(deleteBtn); // 🗑️ Delete button
+
       });
     }
 
