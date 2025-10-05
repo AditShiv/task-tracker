@@ -134,6 +134,33 @@
       margin-left: 5px;
       cursor: pointer;
     }
+    .progress-line-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.progress-line {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background-color: #ccc;
+  z-index: 0;
+}
+
+.step.active .circle {
+  background-color: #4CAF50;
+}
+
+.step.active ~ .step .progress-line {
+  background-color: #ccc;
+}
+
   </style>
 </head>
 <body>
