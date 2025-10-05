@@ -25,23 +25,19 @@
       flex: 1;
       position: relative;
     }
-    .step::before {
-      content: '';
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
+    .step .circle {
       width: 20px;
       height: 20px;
       border-radius: 50%;
       background-color: #ccc;
+      margin: 0 auto;
+      position: relative;
       z-index: 2;
     }
-    .step.active::before {
+    .step.active .circle {
       background-color: #4CAF50;
     }
-    .step::after {
-      content: '';
+    .step .bar {
       position: absolute;
       top: 29px;
       left: 50%;
@@ -51,11 +47,11 @@
       background-color: #ccc;
       z-index: 1;
     }
-    .step:last-child::after {
-      display: none;
-    }
-    .step.active::after {
+    .step.active .bar {
       background-color: #4CAF50;
+    }
+    .step:last-child .bar {
+      display: none;
     }
     .label {
       margin-top: 40px;
@@ -84,11 +80,11 @@
 <body>
   <h1>Task Progress Tracker</h1>
   <div class="tracker" id="tracker">
-    <div class="step"><div class="label">Starting</div></div>
-    <div class="step"><div class="label">Researching</div></div>
-    <div class="step"><div class="label">Sending</div></div>
-    <div class="step"><div class="label">Getting</div></div>
-    <div class="step"><div class="label">Doing</div></div>
+    <div class="step"><div class="circle"></div><div class="bar"></div><div class="label">Starting</div></div>
+    <div class="step"><div class="circle"></div><div class="bar"></div><div class="label">Researching</div></div>
+    <div class="step"><div class="circle"></div><div class="bar"></div><div class="label">Sending</div></div>
+    <div class="step"><div class="circle"></div><div class="bar"></div><div class="label">Getting</div></div>
+    <div class="step"><div class="circle"></div><div class="bar"></div><div class="label">Doing</div></div>
   </div>
   <div class="buttons">
     <button id="undoBtn">Undo</button>
@@ -106,17 +102,25 @@
       undoBtn.disabled = currentStep < 0;
     }
 
+    function activateStep(index) {
+      steps[index].classList.add('active');
+    }
+
+    function deactivateStep(index) {
+      steps[index].classList.remove('active');
+    }
+
     nextBtn.addEventListener('click', () => {
       if (currentStep < steps.length - 1) {
         currentStep++;
-        steps[currentStep].classList.add('active');
+        activateStep(currentStep);
         updateButtons();
       }
     });
 
     undoBtn.addEventListener('click', () => {
       if (currentStep >= 0) {
-        steps[currentStep].classList.remove('active');
+        deactivateStep(currentStep);
         currentStep--;
         updateButtons();
       }
