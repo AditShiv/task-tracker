@@ -13,16 +13,35 @@
     h1 {
       text-align: center;
     }
+    #loginModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000000aa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #loginModal div {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+    }
     .input-section {
       text-align: center;
       margin-bottom: 30px;
     }
-    input[type="text"] {
+    input[type="text"], input[type="password"] {
       padding: 10px;
       width: 300px;
       font-size: 16px;
       border-radius: 5px;
       border: 1px solid #ccc;
+      margin-bottom: 10px;
     }
     button.save {
       margin-left: 10px;
@@ -47,40 +66,38 @@
       position: relative;
     }
     .circle {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: #ccc;
-  margin: 0 auto;
-  position: absolute;
-  top: 20px;
-  left: 0;
-  transform: translateX(-50%);
-  z-index: 2;
-  transition: background-color 0.4s ease;
-}
-
-.step.active .circle {
-  background-color: #4CAF50;
-  transform: scale(1.2);
-  transition: background-color 0.4s ease, transform 0.4s ease;
-}
-
-.bar {
-  position: absolute;
-  top: 29px;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background-color: #ccc;
-  z-index: 1;
-  transition: background-color 0.4s ease;
-}
-
-.step.active .bar {
-  background-color: #4CAF50;
-}
-
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: #ccc;
+      margin: 0 auto;
+      position: absolute;
+      top: 20px;
+      left: 0;
+      transform: translateX(-50%);
+      z-index: 2;
+      transition: background-color 0.4s ease, transform 0.4s ease;
+    }
+    .step:last-child .circle {
+      left: 100%;
+      transform: translateX(-50%);
+    }
+    .step.active .circle {
+      background-color: #4CAF50;
+      transform: scale(1.2);
+    }
+    .bar {
+      position: absolute;
+      top: 29px;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background-color: #ccc;
+      z-index: 1;
+      transition: background-color 0.4s ease;
+    }
+    .step.active .bar {
+      background-color: #4CAF50;
     }
     .step:last-child .bar {
       display: none;
@@ -129,13 +146,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
     }
-    .history input {
+    .history input, .history select {
       font-size: 14px;
-      padding: 5px;
-      margin-right: 10px;
-    }
-    .history select {
       padding: 5px;
       margin-right: 10px;
     }
@@ -145,26 +159,20 @@
       margin-left: 5px;
       cursor: pointer;
     }
-    .circle, .bar {
-      transition: background-color 0.4s ease;
-    }
-    .step.active .circle {
-      transform: scale(1.2);
-      transition: background-color 0.4s ease, transform 0.4s ease;
-    }
   </style>
 </head>
 <body>
-  <div id="loginModal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000000aa;display:flex;justify-content:center;align-items:center;z-index:9999;">
-  <div style="background:white;padding:30px;border-radius:10px;text-align:center;">
-    <h2>Login Required</h2>
-    <input type="text" id="username" placeholder="Username" style="margin:10px;padding:8px;width:80%;"/><br/>
-    <input type="password" id="password" placeholder="Password" style="margin:10px;padding:8px;width:80%;"/><br/>
-    <button onclick="login()" style="margin:10px;padding:10px 20px;">Log In</button>
-    <button onclick="readOnly()" style="margin:10px;padding:10px 20px;">Read-Only</button>
-    <p id="loginError" style="color:red;"></p>
+  <div id="loginModal">
+    <div>
+      <h2>Login Required</h2>
+      <input type="text" id="username" placeholder="Username"/><br/>
+      <input type="password" id="password" placeholder="Password"/><br/>
+      <button onclick="login()">Log In</button>
+      <button onclick="readOnly()">Read-Only</button>
+      <p id="loginError" style="color:red;"></p>
+    </div>
   </div>
-</div>
+
   <h1>Task Progress Tracker</h1>
 
   <div class="input-section">
@@ -192,175 +200,182 @@
   </div>
 
   <script>
-  const steps = document.querySelectorAll('.step');
-  const nextBtn = document.getElementById('nextBtn');
-  const undoBtn = document.getElementById('undoBtn');
-  const historyList = document.getElementById('historyList');
-  const headingInput = document.getElementById('headingInput');
-  let currentStep = -1;
-  let editingId = null; // Track which item is being edited
-
-  function updateButtons() {
-    nextBtn.disabled = currentStep >= steps.length - 1;
-    undoBtn.disabled = currentStep < 0;
-  }
-
-  function activateStep(index) {
-    steps[index].classList.add('active');
-  }
-
-  function deactivateStep(index) {
-    steps[index].classList.remove('active');
-  }
-
-  function setProgressToStage(stageName) {
-    currentStep = -1;
-    steps.forEach(step => step.classList.remove('active'));
-    for (let i = 0; i < steps.length; i++) {
-      const label = steps[i].querySelector('.label').textContent;
-      if (label === stageName) {
-        currentStep = i;
-        for (let j = 0; j <= i; j++) {
-          activateStep(j);
-        }
-        break;
-      }
-    }
-    updateButtons();
-  }
-
-  nextBtn.addEventListener('click', () => {
-    if (currentStep < steps.length - 1) {
-      currentStep++;
-      activateStep(currentStep);
-      updateButtons();
-    }
-  });
-
-  undoBtn.addEventListener('click', () => {
-    if (currentStep >= 0) {
-      deactivateStep(currentStep);
-      currentStep--;
-      updateButtons();
-    }
-  });
-
-  function saveProgress() {
-  if (isReadOnly) {
-    alert("Read-Only mode: Editing is disabled.");
-    return;
-  }
-  // ... rest of your saveProgress code
-}
-
-    const heading = headingInput.value.trim();
-    if (!heading) {
-      alert("Please enter a heading before saving.");
-      return;
-    }
-    const stage = steps[currentStep]?.querySelector('.label')?.textContent || "Not Started";
-    let history = JSON.parse(localStorage.getItem("taskHistory")) || [];
-
-    if (editingId) {
-      history = history.map(item => {
-        if (item.id === editingId) {
-          item.heading = heading;
-          item.stage = stage;
-          item.timestamp = new Date().toLocaleString();
-        }
-        return item;
-      });
-      editingId = null;
-    } else {
-      const entry = { id: Date.now(), heading, stage, timestamp: new Date().toLocaleString() };
-      history.push(entry);
-    }
-
-    localStorage.setItem("taskHistory", JSON.stringify(history));
-    headingInput.value = "";
-    currentStep = -1;
-    steps.forEach(step => step.classList.remove('active'));
-    updateButtons();
-    renderHistory();
-    alert("Progress saved!");
-  }
-
-  function renderHistory() {
-    historyList.innerHTML = "";
-    const history = JSON.parse(localStorage.getItem("taskHistory")) || [];
-    history.forEach(item => {
-      const li = document.createElement("li");
-
-      const headingInput = document.createElement("input");
-      headingInput.value = item.heading;
-      headingInput.disabled = true;
-
-      const stageSelect = document.createElement("select");
-      ["Starting", "Researching", "Sending", "Getting", "Doing", "Completed"].forEach(stage => {
-        const option = document.createElement("option");
-        option.value = stage;
-        option.textContent = stage;
-        if (stage === item.stage) option.selected = true;
-        stageSelect.appendChild(option);
-      });
-      stageSelect.disabled = true;
-
-      const timestamp = document.createElement("span");
-      timestamp.textContent = ` (${item.timestamp})`;
-
-      const editBtn = document.createElement("button");
-      editBtn.textContent = "✏️ Edit";
-      editBtn.onclick = () => {
-        headingInput.value = item.heading;
-        setProgressToStage(item.stage);
-        editingId = item.id;
-        document.getElementById('headingInput').value = item.heading;
-      };
-
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "🗑️ Delete";
-      deleteBtn.onclick = () => deleteItem(item.id);
-
-      li.appendChild(headingInput);
-      li.appendChild(stageSelect);
-      li.appendChild(timestamp);
-      li.appendChild(editBtn);
-      li.appendChild(deleteBtn);
-      historyList.appendChild(li);
-    });
-  }
-
-  function deleteItem(id) {
-    let history = JSON.parse(localStorage.getItem("taskHistory")) || [];
-    history = history.filter(item => item.id !== id);
-    localStorage.setItem("taskHistory", JSON.stringify(history));
-    renderHistory();
-  }
-
-  renderHistory();
-  updateButtons();
+    const steps = document.querySelectorAll('.step');
+    const nextBtn = document.getElementById('nextBtn');
+    const undoBtn = document.getElementById('undoBtn');
+    const historyList = document.getElementById('historyList');
+    const headingInput = document.getElementById('headingInput');
+    let currentStep = -1;
+    let editingId = null;
     let isReadOnly = true;
 
-function login() {
-  const user = document.getElementById('username').value.trim();
-  const pass = document.getElementById('password').value.trim();
-  if (user === 'Ashrith' && pass === '2011') {
-    isReadOnly = false;
-    document.getElementById('loginModal').style.display = 'none';
-    document.querySelector('.save').disabled = false;
-    document.querySelector('.save').style.opacity = '1';
-  } else {
-    document.getElementById('loginError').textContent = 'Invalid credentials';
-  }
-}
+    function login() {
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value.trim();
+      if (user === 'Ashrith' && pass === '2011') {
+        isReadOnly = false;
+        document.getElementById('loginModal').style.display = 'none';
+        document.querySelector('.save').disabled = false;
+        document.querySelector('.save').style.opacity = '1';
+      } else {
+        document.getElementById('loginError').textContent = 'Invalid credentials';
+      }
+    }
 
-function readOnly() {
-  isReadOnly = true;
-  document.getElementById('loginModal').style.display = 'none';
-  document.querySelector('.save').disabled = true;
-  document.querySelector('.save').style.opacity = '0.5';
-}
+    function readOnly() {
+      isReadOnly = true;
+      document.getElementById('loginModal').style.display = 'none';
+      document.querySelector('.save').disabled = true;
+      document.querySelector('.save').style.opacity = '0.5';
+    }
 
-</script>
+    function updateButtons() {
+      nextBtn.disabled = currentStep >= steps.length - 1;
+      undoBtn.disabled = currentStep < 0;
+    }
+
+    function activateStep(index) {
+      steps[index].classList.add('active');
+    }
+
+    function deactivateStep(index) {
+      steps[index].classList.remove('active');
+    }
+
+    function setProgressToStage(stageName) {
+      currentStep = -1;
+      steps.forEach(step => step.classList.remove('active'));
+      for (let i = 0; i < steps.length; i++) {
+        const label = steps[i].querySelector('.label').textContent;
+        if (label === stageName) {
+          currentStep = i;
+          for (let j = 0; j <= i; j++) {
+            activateStep(j);
+          }
+          break;
+        }
+      }
+      updateButtons();
+    }
+
+    nextBtn.addEventListener('click', () => {
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+                activateStep(currentStep);
+        updateButtons();
+      }
+    });
+
+    undoBtn.addEventListener('click', () => {
+      if (currentStep >= 0) {
+        deactivateStep(currentStep);
+        currentStep--;
+        updateButtons();
+      }
+    });
+
+    function saveProgress() {
+      if (isReadOnly) {
+        alert("Read-Only mode: Editing is disabled.");
+        return;
+      }
+
+      const heading = headingInput.value.trim();
+      if (!heading) {
+        alert("Please enter a heading before saving.");
+        return;
+      }
+      const stage = steps[currentStep]?.querySelector('.label')?.textContent || "Not Started";
+      let history = JSON.parse(localStorage.getItem("taskHistory")) || [];
+
+      if (editingId) {
+        history = history.map(item => {
+          if (item.id === editingId) {
+            item.heading = heading;
+            item.stage = stage;
+            item.timestamp = new Date().toLocaleString();
+          }
+          return item;
+        });
+        editingId = null;
+      } else {
+        const entry = { id: Date.now(), heading, stage, timestamp: new Date().toLocaleString() };
+        history.push(entry);
+      }
+
+      localStorage.setItem("taskHistory", JSON.stringify(history));
+      headingInput.value = "";
+      currentStep = -1;
+      steps.forEach(step => step.classList.remove('active'));
+      updateButtons();
+      renderHistory();
+      alert("Progress saved!");
+    }
+
+    function renderHistory() {
+      historyList.innerHTML = "";
+      const history = JSON.parse(localStorage.getItem("taskHistory")) || [];
+      history.forEach(item => {
+        const li = document.createElement("li");
+
+        const headingInput = document.createElement("input");
+        headingInput.value = item.heading;
+        headingInput.disabled = true;
+
+        const stageSelect = document.createElement("select");
+        ["Starting", "Researching", "Sending", "Getting", "Doing", "Completed"].forEach(stage => {
+          const option = document.createElement("option");
+          option.value = stage;
+          option.textContent = stage;
+          if (stage === item.stage) option.selected = true;
+          stageSelect.appendChild(option);
+        });
+        stageSelect.disabled = true;
+
+        const timestamp = document.createElement("span");
+        timestamp.textContent = ` (${item.timestamp})`;
+
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "✏️ Edit";
+        editBtn.onclick = () => {
+          if (isReadOnly) {
+            alert("Read-Only mode: Editing is disabled.");
+            return;
+          }
+          headingInput.value = item.heading;
+          setProgressToStage(item.stage);
+          editingId = item.id;
+        };
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "🗑️ Delete";
+        deleteBtn.onclick = () => {
+          if (isReadOnly) {
+            alert("Read-Only mode: Editing is disabled.");
+            return;
+          }
+          deleteItem(item.id);
+        };
+
+        li.appendChild(headingInput);
+        li.appendChild(stageSelect);
+        li.appendChild(timestamp);
+        li.appendChild(editBtn);
+        li.appendChild(deleteBtn);
+        historyList.appendChild(li);
+      });
+    }
+
+    function deleteItem(id) {
+      let history = JSON.parse(localStorage.getItem("taskHistory")) || [];
+      history = history.filter(item => item.id !== id);
+      localStorage.setItem("taskHistory", JSON.stringify(history));
+      renderHistory();
+    }
+
+    // Initial render
+    renderHistory();
+    updateButtons();
+  </script>
 </body>
 </html>
