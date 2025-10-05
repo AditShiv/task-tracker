@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Task Progress Tracker</title>
+  <title>Task Tracker</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -46,9 +46,28 @@
       flex: 1;
       position: relative;
     }
+    .step .circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: #ccc;
+      margin: 0 auto;
+      position: absolute;
+      top: 20px;
+      left: 0;
+      transform: translateX(-50%);
+      z-index: 2;
+    }
+    .step:last-child .circle {
+      left: 100%;
+      transform: translateX(-50%);
+    }
+    .step.active .circle {
+      background-color: #4CAF50;
+    }
     .step .bar {
       position: absolute;
-      top: 30px;
+      top: 29px;
       left: 0;
       width: 100%;
       height: 4px;
@@ -61,24 +80,8 @@
     .step:last-child .bar {
       display: none;
     }
-    .circle-label {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      z-index: 2;
-    }
-    .circle {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background-color: #ccc;
-    }
-    .step.active .circle {
-      background-color: #4CAF50;
-    }
     .label {
-      margin-top: 8px;
+      margin-top: 60px;
       font-weight: bold;
     }
     .buttons {
@@ -121,10 +124,13 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
     }
-    .history input, .history select {
+    .history input {
       font-size: 14px;
+      padding: 5px;
+      margin-right: 10px;
+    }
+    .history select {
       padding: 5px;
       margin-right: 10px;
     }
@@ -134,33 +140,6 @@
       margin-left: 5px;
       cursor: pointer;
     }
-    .progress-line-wrapper {
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.progress-line {
-  position: absolute;
-  top: 30px;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background-color: #ccc;
-  z-index: 0;
-}
-
-.step.active .circle {
-  background-color: #4CAF50;
-}
-
-.step.active ~ .step .progress-line {
-  background-color: #ccc;
-}
-
   </style>
 </head>
 <body>
@@ -171,19 +150,14 @@
     <button class="save" onclick="saveProgress()">Save Progress</button>
   </div>
 
- <div class="tracker">
-  <div class="progress-line-wrapper">
-    <div class="progress-line"></div>
-
-    <div class="step"><div class="circle-label"><div class="circle"></div><div class="label">Starting</div></div></div>
-    <div class="step"><div class="circle-label"><div class="circle"></div><div class="label">Researching</div></div></div>
-    <div class="step"><div class="circle-label"><div class="circle"></div><div class="label">Sending</div></div></div>
-    <div class="step"><div class="circle-label"><div class="circle"></div><div class="label">Getting</div></div></div>
-    <div class="step"><div class="circle-label"><div class="circle"></div><div class="label">Doing</div></div></div>
-    <div class="step"><div class="circle-label"><div class="circle"></div><div class="label">Completed</div></div></div>
+  <div class="tracker" id="tracker">
+    <div class="step"><div class="bar"></div><div class="circle"></div><div class="label">Starting</div></div>
+    <div class="step"><div class="bar"></div><div class="circle"></div><div class="label">Researching</div></div>
+    <div class="step"><div class="bar"></div><div class="circle"></div><div class="label">Sending</div></div>
+    <div class="step"><div class="bar"></div><div class="circle"></div><div class="label">Getting</div></div>
+    <div class="step"><div class="bar"></div><div class="circle"></div><div class="label">Doing</div></div>
+    <div class="step"><div class="circle"></div><div class="label">Completed</div></div>
   </div>
-</div>
-
 
   <div class="buttons">
     <button class="nav" id="undoBtn">Undo</button>
@@ -200,9 +174,7 @@
     const nextBtn = document.getElementById('nextBtn');
     const undoBtn = document.getElementById('undoBtn');
     const historyList = document.getElementById('historyList');
-    const headingInput = document.getElementById('headingInput');
     let currentStep = -1;
-    let editingId = null;
 
     function updateButtons() {
       nextBtn.disabled = currentStep >= steps.length - 1;
@@ -215,22 +187,6 @@
 
     function deactivateStep(index) {
       steps[index].classList.remove('active');
-    }
-
-    function setProgressToStage(stageName) {
-      currentStep = -1;
-      steps.forEach(step => step.classList.remove('active'));
-      for (let i = 0; i < steps.length; i++) {
-        const label = steps[i].querySelector('.label').textContent;
-        if (label === stageName) {
-          currentStep = i;
-          for (let j = 0; j <= i; j++) {
-            activateStep(j);
-          }
-          break;
-        }
-      }
-      updateButtons();
     }
 
     nextBtn.addEventListener('click', () => {
@@ -250,35 +206,19 @@
     });
 
     function saveProgress() {
-      const heading = headingInput.value.trim();
+      const heading = document.getElementById('headingInput').value.trim();
       if (!heading) {
         alert("Please enter a heading before saving.");
         return;
       }
       const stage = steps[currentStep]?.querySelector('.label')?.textContent || "Not Started";
+      const entry = { id: Date.now(), heading, stage, timestamp: new Date().toLocaleString() };
+
       let history = JSON.parse(localStorage.getItem("taskHistory")) || [];
-
-      if (editingId) {
-        history = history.map(item => {
-          if (item.id === editingId) {
-            item.heading = heading;
-            item.stage = stage;
-            item.timestamp = new Date().toLocaleString();
-          }
-          return item;
-        });
-        editingId = null;
-      } else {
-        const entry = { id: Date.now(), heading, stage, timestamp: new Date().toLocaleString() };
-        history.push(entry);
-      }
-
+      history.push(entry);
       localStorage.setItem("taskHistory", JSON.stringify(history));
-      headingInput.value = "";
-      currentStep = -1;
-      steps.forEach(step => step.classList.remove('active'));
-      updateButtons();
       renderHistory();
+      alert("Progress saved!");
     }
 
     function renderHistory() {
@@ -289,9 +229,9 @@
 
         const headingInput = document.createElement("input");
         headingInput.value = item.heading;
-        headingInput.disabled = true;
+        headingInput.onchange = () => updateItem(item.id, headingInput.value, null);
 
-                const stageSelect = document.createElement("select");
+        const stageSelect = document.createElement("select");
         ["Starting", "Researching", "Sending", "Getting", "Doing", "Completed"].forEach(stage => {
           const option = document.createElement("option");
           option.value = stage;
@@ -299,30 +239,34 @@
           if (stage === item.stage) option.selected = true;
           stageSelect.appendChild(option);
         });
-        stageSelect.disabled = true;
+        stageSelect.onchange = () => updateItem(item.id, null, stageSelect.value);
 
         const timestamp = document.createElement("span");
         timestamp.textContent = ` (${item.timestamp})`;
 
-        const editBtn = document.createElement("button");
-        editBtn.textContent = "✏️ Edit";
-        editBtn.onclick = () => {
-          headingInput.value = item.heading;
-          setProgressToStage(item.stage);
-          editingId = item.id;
-        };
-
         const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "🗑️ Delete";
+        deleteBtn.textContent = "Delete";
         deleteBtn.onclick = () => deleteItem(item.id);
 
         li.appendChild(headingInput);
         li.appendChild(stageSelect);
         li.appendChild(timestamp);
-        li.appendChild(editBtn);
         li.appendChild(deleteBtn);
         historyList.appendChild(li);
       });
+    }
+
+    function updateItem(id, newHeading, newStage) {
+      let history = JSON.parse(localStorage.getItem("taskHistory")) || [];
+      history = history.map(item => {
+        if (item.id === id) {
+          if (newHeading !== null) item.heading = newHeading;
+          if (newStage !== null) item.stage = newStage;
+        }
+        return item;
+      });
+            localStorage.setItem("taskHistory", JSON.stringify(history));
+      renderHistory();
     }
 
     function deleteItem(id) {
