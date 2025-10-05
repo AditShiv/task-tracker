@@ -259,9 +259,9 @@
     }
 
     nextBtn.addEventListener('click', () => {
-      if (currentStep < steps.length - 1) {
-        currentStep++;
-                activateStep(currentStep);
+      if (currentStep < steps.length - 1)
+                currentStep++;
+        activateStep(currentStep);
         updateButtons();
       }
     });
@@ -335,6 +335,14 @@
         const timestamp = document.createElement("span");
         timestamp.textContent = ` (${item.timestamp})`;
 
+        const viewBtn = document.createElement("button");
+        viewBtn.textContent = "👁️ View";
+        viewBtn.onclick = () => {
+          headingInput.value = item.heading;
+          setProgressToStage(item.stage);
+          editingId = null;
+        };
+
         const editBtn = document.createElement("button");
         editBtn.textContent = "✏️ Edit";
         editBtn.onclick = () => {
@@ -346,15 +354,6 @@
           setProgressToStage(item.stage);
           editingId = item.id;
         };
-
-        const viewBtn = document.createElement("button");
-        viewBtn.textContent = "👁️ View";
-        viewBtn.onclick = () => {
-          headingInput.value = item.heading;
-          setProgressToStage(item.stage);
-          editingId = null;
-        };
-
 
         const deleteBtn = document.createElement("button");
         deleteBtn.textContent = "🗑️ Delete";
@@ -369,10 +368,10 @@
         li.appendChild(headingInput);
         li.appendChild(stageSelect);
         li.appendChild(timestamp);
-        li.appendChild(viewBtn);   // 👁️ View button
-        li.appendChild(editBtn);   // ✏️ Edit button
-        li.appendChild(deleteBtn); // 🗑️ Delete button
-
+        li.appendChild(viewBtn);
+        li.appendChild(editBtn);
+        li.appendChild(deleteBtn);
+        historyList.appendChild(li);
       });
     }
 
@@ -383,7 +382,6 @@
       renderHistory();
     }
 
-    // Initial render
     renderHistory();
     updateButtons();
   </script>
